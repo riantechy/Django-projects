@@ -2,8 +2,9 @@ from ctypes import addressof
 from multiprocessing import context
 from django.http import JsonResponse
 from django.shortcuts import render
-from . utils import cookieCart, cartData
+from . utils import cookieCart, cartData, guestOrder
 import datetime
+from django.views.generic import DetailView
 import json
 from .models import *
 
@@ -14,6 +15,11 @@ def stores(request):
     products = Product.objects.all()
     context = {'products': products, 'cartItems': cartItems}
     return render(request, 'stores/stores.html', context)
+
+# Creating the list of each post
+class PostDetailView(DetailView):
+    model = Product
+    template_name = 'stores/product_details.html'
 
 def cart(request):
     data = cartData(request)
@@ -71,25 +77,27 @@ def processOrder(request):
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']['total'])
-        order.transaction_id = transaction_id
 
-        # preventing user from malipulating from the frontend
-        if total == float(order.get_cart_total):
-            order.complete = True
-        order.save()
-
-        # setting the value of shipping
-        if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer = customer,
-                order = order,
-                address = data['shipping']['address'],
-                city = data['shipping']['city'],
-                state = data['shipping']['state'],
-                zipcode = data['shipping']['zipcode'],
-            )
 
     else:
-        print('User is not logged in...')
+        customer, order = guestOrder(request, order)
+
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+
+    # preventing user from malipulating from the frontend
+    if total == float(order.get_cart_total):
+        order.complete = True
+        order.save()
+
+    # setting the value of shipping
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+            customer = customer,
+            order = order,
+            address = data['shipping']['address'],
+            city = data['shipping']['city'],
+            state = data['shipping']['state'],
+            zipcode = data['shipping']['zipcode'],
+        )
     return JsonResponse('Payment Subbmitted', safe=False)

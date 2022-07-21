@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'stores.apps.StoresConfig',
+    'users.apps.UsersConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -131,3 +132,7 @@ LOGIN_REDIRECT_URL = 'stores'
 
 #telling the crispy which styles to use
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# redirecting the user to home page when loged in
+LOGIN_REDIRECT_URL = 'stores'
+LOGIN_URL = 'login'

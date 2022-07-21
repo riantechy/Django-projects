@@ -9,7 +9,7 @@ from sqlalchemy import null
 # Create your models here.
 
 class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, default='', related_name='customer', related_query_name='customer')
     name = models.CharField(max_length=200, null=True)
     email = models.CharField(max_length=200, null=True)
 
@@ -20,6 +20,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200, null=True)
     price = models.DecimalField(default=200, max_digits=10, decimal_places=2)
     digital = models.BooleanField(default=False, null=True,blank=False)
+    description = models.TextField(default='More about this product')
     image = models.ImageField(null=True, blank=True)
 
     def __str__ (self):
